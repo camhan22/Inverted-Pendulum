@@ -1,0 +1,21 @@
+Pid	KEYWORD1
+
+setTimeStep	KEYWORD2
+setTimeDivisor	KEYWORD2
+setKp	KEYWORD2
+setKi	KEYWORD2
+setKd	KEYWORD2
+setReference	KEYWORD2
+
+getTimeStep	KEYWORD2
+getTimeDivisor	KEYWORD2
+getKp	KEYWORD2
+getKi	KEYWORD2
+getKd	KEYWORD2
+getReference	KEYWORD2
+
+SetInput	KEYWORD2
+CalcDerivative	KEYWORD2
+CalcIntegral	KEYWORD2
+ControlValue	KEYWORD2
+
