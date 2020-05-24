@@ -106,11 +106,11 @@ void loop() {
   Current_Time = millis();
   if(Current_Time - Last_Time >= Sample_Period)
   {
-    Controller.SetInput(analogRead(Angle_Sensor_Pin));// Read the sensor and put it into the controller
-    Control_Signal = Controller.ControlValue();// Calculate the control value of the system
-    Serial.println(Control_Signal);
-    SetSpeed(Control_Signal);// Set the speed of the controller
-    SetDirection(Control_Signal);// Set the dirction of the controller
+    //Controller.SetInput(analogRead(Angle_Sensor_Pin));// Read the sensor and put it into the controller
+    //Control_Signal = Controller.ControlValue();// Calculate the control value of the system
+    //Serial.println(Control_Signal);
+    //SetSpeed(Control_Signal);// Set the speed of the controller
+    //SetDirection(Control_Signal);// Set the dirction of the controller
   }
   //If we have not gotten a sample, continue to do the same thing. i.e. change nothing
 }
