@@ -19,6 +19,7 @@
 int PWM_Pin = 9;
 int IN3_Pin = 2;
 int IN4_Pin = 3;
+int Power_Pin = 13;
 int Angle_Sensor_Pin = A5;
 //END PIN DEFINITIONS//
 
@@ -48,6 +49,8 @@ void SetDirection(double cs);
 
 void setup() {
   //Setup the I/O pins
+  pinMode(Power_Pin,OUTPUT);
+  pinMode(Power_Pin, HIGH);
   pinMode(PWM_Pin, OUTPUT);
   pinMode(Angle_Sensor_Pin, INPUT);
   pinMode(IN3_Pin, OUTPUT);
