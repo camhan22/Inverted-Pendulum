@@ -37,7 +37,7 @@ int Previous_Value;// Holds the previous value of the sensor during the swing
 bool is_Controlled = false;// Variable to hold whether the system should swing or control the arm
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
 //By default it should swing since it will be at the bottom of the arc
-int Swing Limit = 10;// Variable to hold the value at which the controller will switch to controlled mode
+int Swing_Limit = 10;// Variable to hold the value at which the controller will switch to controlled mode
 int Swing_Rate = 25;// Dictates how fast the system will get to the controlling point
 Pid Controller(100, 'm', (Max_Sensor_Value+Min_Sensor_Value)/2, 0);// Create the controller
 //END CONTROLLER PARAMETERS//
