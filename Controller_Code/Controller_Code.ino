@@ -1,4 +1,4 @@
-#include <PID.h>// Include the PID alogirthm
+#include "PID.h"// Include the PID alogirthm
 
 /*
  * Author:Cameron Hanson
@@ -50,7 +50,7 @@ void SetDirection(double cs);
 void setup() {
   //Setup the I/O pins
   pinMode(Power_Pin,OUTPUT);
-  pinMode(Power_Pin, HIGH);
+  digitalWrite(Power_Pin, HIGH);
   pinMode(PWM_Pin, OUTPUT);
   pinMode(Angle_Sensor_Pin, INPUT);
   pinMode(IN3_Pin, OUTPUT);
