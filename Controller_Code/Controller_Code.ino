@@ -26,7 +26,7 @@ int Angle_Sensor_Pin = A5;
 //SYSTEM PARAMETERS//
 int Max_Sensor_Value = 1023;// Max sensor value at system limits
 int Min_Sensor_Value = 0;// Min sensor value at system limts
-int Sample_Period = 100;// Time between samples
+int Sample_Period = 500;// Time between samples
 unsigned long Current_Time = 0;
 unsigned long Last_Time = 0;
 //END SYSTEM PARAMETERS//
@@ -64,22 +64,21 @@ void setup() {
 	{
 		//CHECK DIRECTION AND SEE IF UPDATE IS NEEDED//
 		if(Control_Signal > 0){// If we are rotating in the clockwise direction	
-			if(analogRead(Angle_Sensor_Pin) - Previous_Value <= 0 && abs(analogRead(Angle_Sensor_Pin) - Previous_Value) < 200){
+			if(analogRead(Angle_Sensor_Pin) - Previous_Value < 0 && abs(analogRead(Angle_Sensor_Pin) - Previous_Value) < 200){
 				// If the new value is less than the old value which can only happen when the direction reverses due to gravity, reverse the direction.
 				//Also check to see that the difference is not greater than 200 which happens at the bottom of the swing due to crossover
 				is_Updated = false;
 			}
 		}
 		else{// Counter-clockwise direction
-			if(analogRead(Angle_Sensor_Pin) - Previous_Value >= 0 && abs(analogRead(Angle_Sensor_Pin) - Previous_Value) < 200){
+			if(analogRead(Angle_Sensor_Pin) - Previous_Value > 0 && abs(analogRead(Angle_Sensor_Pin) - Previous_Value) < 200){
 				is_Updated = false;// We have given it new commands and we shoudl do them
 			}
 		}
 		//END CHECK DIRECTION AND SEE IF UPDATE IS NEEDED//
 		
-		
 		//UPDATE THE SWING//
-		if(~is_Updated){// Only do this if we need to change direction
+		if(!is_Updated){// Only do this if we need to change direction
 			Control_Signal+= (Control_Signal > 0) ? Swing_Rate : -1*Swing_Rate;
 			// If the value of C_S is above zero, we add swing rate, if less than zero, we subtract. This ensures that we are increasing the power each time
 			Control_Signal *= -1;// Reverse swing direction
@@ -91,9 +90,12 @@ void setup() {
 		
 		
 		//DO THESE EVERY SAMPLE//
+    Last_Time = Current_Time;
 		Previous_Value = analogRead(Angle_Sensor_Pin);// Update the previous value
-		if(abs(Previous_Value) <= ((Max_Sensor_Value+Min_Sensor_Value)/2)+Swing_Limit || abs(Previous_Value) >= ((Max_Sensor_Value+Min_Sensor_Value)/2)-Swing_Limit){// Check every sample to see if it is within the limit for PID to take over
+    Serial.println(Previous_Value);
+		if(Previous_Value > (Max_Sensor_Value + Min_Sensor_Value)/2-Swing_Limit && Previous_Value < (Max_Sensor_Value + Min_Sensor_Value)/2+Swing_Limit){// Check every sample to see if it is within the limit for PID to take over
 			is_Controlled = true;// If so, then we will allow the PID to take over
+      SetSpeed(0);// Stop the motor
 			break;// And we need to exit the loop
 		}
 	}
@@ -111,6 +113,7 @@ void loop() {
     //Serial.println(Control_Signal);
     //SetSpeed(Control_Signal);// Set the speed of the controller
     //SetDirection(Control_Signal);// Set the dirction of the controller
+    //Last_Time = Current_Time;
   }
   //If we have not gotten a sample, continue to do the same thing. i.e. change nothing
 }
