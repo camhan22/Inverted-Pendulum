@@ -62,6 +62,7 @@ void loop() {
     Serial.println(Control_Signal);
     SetSpeed(Control_Signal);// Set the speed of the controller
     SetDirection(Control_Signal);// Set the dirction of the controller
+	Last_Time = Current_Time;// Update the last time the loop exectuted
   }
   //If we have not gotten a sample, continue to do the same thing. i.e. change nothing
 }
