@@ -11,7 +11,6 @@
  * //END REVISION HISTORY//
  * 
  * //TO DO
- * Need to correct directions for system, but cannot do that until I know which way the angle sensor is facing
  * //END TO DO
  */
 
@@ -19,7 +18,7 @@
 int PWM_Pin = 9;
 int IN3_Pin = 2;
 int IN4_Pin = 3;
-int Power_Pin = 13;
+int Power_Pin = 13;// Pin used to provide power to the H-Bridge for convience
 int Angle_Sensor_Pin = A5;
 //END PIN DEFINITIONS//
 
@@ -50,8 +49,8 @@ void SetDirection(double cs);
 
 void setup() {
   //Setup the I/O pins
-  pinMode(Power_Pin,OUTPUT);
-  digitalWrite(Power_Pin, HIGH);
+  pinMode(Power_Pin, OUTPUT);
+  digitalWrite(Power_Pin, HIGH);// Set the pin to output 5v for H_Bridge
   pinMode(PWM_Pin, OUTPUT);
   pinMode(Angle_Sensor_Pin, INPUT);
   pinMode(IN3_Pin, OUTPUT);
@@ -114,12 +113,12 @@ void loop() {
   Current_Time = millis();
   if(Current_Time - Last_Time >= Sample_Period)
   {
-    //Controller.SetInput(analogRead(Angle_Sensor_Pin));// Read the sensor and put it into the controller
-    //Control_Signal = Controller.ControlValue();// Calculate the control value of the system
-    //Serial.println(Control_Signal);
-    //SetSpeed(Control_Signal);// Set the speed of the controller
-    //SetDirection(Control_Signal);// Set the dirction of the controller
-    //Last_Time = Current_Time;
+    Controller.SetInput(analogRead(Angle_Sensor_Pin));// Read the sensor and put it into the controller
+    Control_Signal = Controller.ControlValue();// Calculate the control value of the system
+    Serial.println(Control_Signal);
+    SetSpeed(Control_Signal);// Set the speed of the controller
+    SetDirection(Control_Signal);// Set the dirction of the controller
+	Last_Time = Current_Time;// Update the last time the loop exectuted
   }
   //If we have not gotten a sample, continue to do the same thing. i.e. change nothing
 }
