@@ -33,6 +33,7 @@ unsigned long Last_Time = 0;
 
 //CONTROLLER PARAMETERS//
 double Control_Signal = 75;
+int Current_Value;
 int Previous_Value;// Holds the previous value of the sensor during the swing
 bool is_Controlled = false;// Variable to hold whether the system should swing or control the arm
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
@@ -62,16 +63,17 @@ void setup() {
 	  Current_Time = millis();
 	  if(Current_Time - Last_Time >= Sample_Period)// Once we have elapsed the sample period, we need a new value
 	  {
+      Current_Value = analogRead(Angle_Sensor_Pin);
 		  //CHECK DIRECTION AND SEE IF UPDATE IS NEEDED//
 		  if(Control_Signal < 0){// If we are rotating in the clockwise direction
-			  if(analogRead(Angle_Sensor_Pin) - Previous_Value <= 0 && analogRead(Angle_Sensor_Pin) < 1023/2){
+			  if(Current_Value - Previous_Value <= 0 && Current_Value < (Max_Sensor_Value + Min_Sensor_Value)/2 && abs(Current_Value-Previous_Value) < 100){
 				  // If the new value is less than the old value which can only happen when the direction reverses due to gravity, reverse the direction.
 				  //Also check to see that the difference is not greater than 200 which happens at the bottom of the swing due to crossover
 				  is_Updated = false;
 			  }
 		  }
 		  else{// Counter-clockwise direction
-			  if(analogRead(Angle_Sensor_Pin) - Previous_Value >= 0 && analogRead(Angle_Sensor_Pin) > 1023/2){
+			  if(Current_Value - Previous_Value >= 0 && Current_Value > (Max_Sensor_Value + Min_Sensor_Value)/2 && abs(Current_Value-Previous_Value) < 100){
 				  is_Updated = false;// We have given it new commands and we shoudl do them
 			  }
 		  }
@@ -91,7 +93,7 @@ void setup() {
 		
 		    //DO THESE EVERY SAMPLE//
         Last_Time = Current_Time;
-		    Previous_Value = analogRead(Angle_Sensor_Pin);// Update the previous value
+		    Previous_Value = Current_Value;// Update the previous value
 		  }
 	  }
 
