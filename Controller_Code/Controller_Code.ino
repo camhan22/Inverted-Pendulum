@@ -34,17 +34,18 @@ unsigned long Last_Time = 0;
 double Control_Signal = 75;
 int Current_Value;
 int Previous_Value;// Holds the previous value of the sensor during the swing
-bool is_Controlled = false;// Variable to hold whether the system should swing or control the arm
+bool is_Controlled = true;// Variable to hold whether the system should swing or control the arm
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
 //By default it should swing since it will be at the bottom of the arc
-int Swing_Limit = 25;// Variable to hold the value at which the controller will switch to controlled mode
+int Swing_Limit = 75;// Variable to hold the value at which the controller will switch to controlled mode
 int Swing_Rate = 10;// Dictates how fast the system will get to the controlling point
-Pid Controller(100, 'm', (Max_Sensor_Value+Min_Sensor_Value)/2, 0);// Create the controller
+Pid Controller(100, 'm', 517, 0.74);// Create the controller
 //END CONTROLLER PARAMETERS//
 
 //FUNCTION PROTOTYPES//
 void SetSpeed(double cs);
 void SetDirection(double cs);
+double MapDouble(int x, int in_min, int in_max, int out_min, int out_max);
 //END FUNCTION PROTOTYPES//
 
 void setup() {
@@ -64,7 +65,7 @@ void setup() {
 	  {
       Current_Value = analogRead(Angle_Sensor_Pin);
 		  //CHECK DIRECTION AND SEE IF UPDATE IS NEEDED//
-		  if(Control_Signal < 0){// If we are rotating in the clockwise direction
+		  if(Control_Signal > 0){// If we are rotating in the clockwise direction
 			  if(Current_Value - Previous_Value <= 0 && Current_Value < (Max_Sensor_Value + Min_Sensor_Value)/2 && abs(Current_Value-Previous_Value) < 100){
 				  // If the new value is less than the old value which can only happen when the direction reverses due to gravity, reverse the direction.
 				  //Also check to see that the difference is not greater than 200 which happens at the bottom of the swing due to crossover
@@ -96,8 +97,8 @@ void setup() {
 		  }
 	  }
 
-    Serial.println(analogRead(Angle_Sensor_Pin));
     int Value = analogRead(Angle_Sensor_Pin);
+    Serial.println(Value);
     // Check this every time through the loop, we do not want to miss this 
     if (Value > (Max_Sensor_Value + Min_Sensor_Value)/2-Swing_Limit && Value < (Max_Sensor_Value + Min_Sensor_Value)/2+Swing_Limit){// Check to see if it is within the limit for PID to take over
     is_Controlled = true;// If so, then we will allow the PID to take over
@@ -110,12 +111,11 @@ void setup() {
 
 void loop() {
 
-  Current_Time = millis();
+  Current_Time = millis();  
   if(Current_Time - Last_Time >= Sample_Period)
   {
     Controller.SetInput(analogRead(Angle_Sensor_Pin));// Read the sensor and put it into the controller
     Control_Signal = Controller.ControlValue();// Calculate the control value of the system
-    Serial.println(Control_Signal);
     SetSpeed(Control_Signal);// Set the speed of the controller
     SetDirection(Control_Signal);// Set the dirction of the controller
 	Last_Time = Current_Time;// Update the last time the loop exectuted
@@ -131,15 +131,19 @@ void SetSpeed(double cs)
 }
 void SetDirection(double cs)
 {
-  if(cs > 0)// If the signal is greater than zero, set the direction to clockwise
-  {
-    digitalWrite(IN3_Pin, HIGH);
-    digitalWrite(IN4_Pin, LOW);
-  }
-  else// Otherwise counter-clockwise
+  if(cs > 0)
   {
     digitalWrite(IN3_Pin, LOW);
     digitalWrite(IN4_Pin, HIGH);
   }
+  else
+  {
+    digitalWrite(IN3_Pin, HIGH);
+    digitalWrite(IN4_Pin, LOW);
+  }
 }
+
+double MapDouble(int x, int in_min, int in_max, int out_min, int out_max){
+ return ((double)x - (double)in_min) * ((double)out_max - (double)out_min) / ((double)in_max - (double)in_min) + (double)out_min;
+ }
 //END FUNCTIONS//
