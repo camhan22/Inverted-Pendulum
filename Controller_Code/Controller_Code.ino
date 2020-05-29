@@ -25,7 +25,7 @@ int Angle_Sensor_Pin = A5;
 //SYSTEM PARAMETERS//
 int Max_Sensor_Value = 1023;// Max sensor value at system limits
 int Min_Sensor_Value = 0;// Min sensor value at system limts
-int Sample_Period = 100;// Time between samples
+int Sample_Period = 50;// Time between samples
 unsigned long Current_Time = 0;
 unsigned long Last_Time = 0;
 //END SYSTEM PARAMETERS//
@@ -34,12 +34,12 @@ unsigned long Last_Time = 0;
 double Control_Signal = 75;
 int Current_Value;
 int Previous_Value;// Holds the previous value of the sensor during the swing
-bool is_Controlled = true;// Variable to hold whether the system should swing or control the arm
+bool is_Controlled = false;// Variable to hold whether the system should swing or control the arm
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
 //By default it should swing since it will be at the bottom of the arc
 int Swing_Limit = 75;// Variable to hold the value at which the controller will switch to controlled mode
 int Swing_Rate = 10;// Dictates how fast the system will get to the controlling point
-Pid Controller(100, 'm', 517, 0.74);// Create the controller
+Pid Controller(100, 'm', 517, 1.25, 0.40, 0.15);// Create the controller
 //END CONTROLLER PARAMETERS//
 
 //FUNCTION PROTOTYPES//
@@ -118,7 +118,8 @@ void loop() {
     Control_Signal = Controller.ControlValue();// Calculate the control value of the system
     SetSpeed(Control_Signal);// Set the speed of the controller
     SetDirection(Control_Signal);// Set the dirction of the controller
-	Last_Time = Current_Time;// Update the last time the loop exectuted
+	  Last_Time = Current_Time;// Update the last time the loop exectuted
+   Serial.println(Control_Signal);
   }
   //If we have not gotten a sample, continue to do the same thing. i.e. change nothing
 }

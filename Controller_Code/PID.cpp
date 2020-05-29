@@ -86,15 +86,15 @@ void Pid::SetInput(int i)// i is between 0 and 1023
 }
 void Pid::CalcDerivative()
 {
-	Derivative_ = (double)(Current_Error_-Previous_Error_)/(double)(TimeStep_/TimeDivisor_);
+	Derivative_ = (double)(Current_Error_-Previous_Error_)/((double)TimeStep_/(double)TimeDivisor_);
 }
 void Pid::CalcIntegral()
 {
-	Integral_ += (double)Current_Error_*(double)(TimeStep_/TimeDivisor_);
+	Integral_ += (double)Current_Error_*((double)TimeStep_/(double)TimeDivisor_);
 }
 double Pid::ControlValue()
 {
 	CalcDerivative();
 	CalcIntegral();
-	return Kp_*(double)Current_Error_;
+	return Kp_*(double)Current_Error_ + Kd_*Derivative_ + Ki_*Integral_;
 }
