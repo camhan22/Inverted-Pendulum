@@ -31,15 +31,16 @@ unsigned long Last_Time = 0;
 //END SYSTEM PARAMETERS//
 
 //CONTROLLER PARAMETERS//
-double Control_Signal = 75;
+double Control_Signal = 25 ;
 int Current_Value;
+int Reference = 300;
 int Previous_Value;// Holds the previous value of the sensor during the swing
 bool is_Controlled = false;// Variable to hold whether the system should swing or control the arm
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
 //By default it should swing since it will be at the bottom of the arc
-int Swing_Limit = 75;// Variable to hold the value at which the controller will switch to controlled mode
-int Swing_Rate = 10;// Dictates how fast the system will get to the controlling point
-Pid Controller(100, 'm', 517, 1.25, 0.40, 0.15);// Create the controller
+int Swing_Limit = 10;// Variable to hold the value at which the controller will switch to controlled mode
+int Swing_Rate = 5;// Dictates how fast the system will get to the controlling point
+Pid Controller(100, 'm', Reference, 1.25, 0.40, 0.15);// Create the controller
 //END CONTROLLER PARAMETERS//
 
 //FUNCTION PROTOTYPES//
@@ -100,7 +101,7 @@ void setup() {
     int Value = analogRead(Angle_Sensor_Pin);
     Serial.println(Value);
     // Check this every time through the loop, we do not want to miss this 
-    if (Value > (Max_Sensor_Value + Min_Sensor_Value)/2-Swing_Limit && Value < (Max_Sensor_Value + Min_Sensor_Value)/2+Swing_Limit){// Check to see if it is within the limit for PID to take over
+    if (Value > Reference-Swing_Limit && Value < Reference+Swing_Limit){// Check to see if it is within the limit for PID to take over
     is_Controlled = true;// If so, then we will allow the PID to take over
     SetSpeed(0);// Stop the motor
     break;// And we need to exit the loop
