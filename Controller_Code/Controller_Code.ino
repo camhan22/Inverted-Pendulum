@@ -46,7 +46,7 @@ bool is_Controlled = false;// Variable to hold whether the system should swing o
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
 //By default it should swing since it will be at the bottom of the arc
 int Swing_Limit = 15;// Variable to hold the value at which the controller will switch to controlled Mode
-int Swing_Rate = 5;// Dictates how fast the system will get to the controlling point
+int Swing_Rate = 3;// Dictates how fast the system will get to the controlling point
 Pid Controller(Sample_Period, 'm', Reference, 1.5, 0.40, 0.2);// Create the controller
 //END CONTROLLER PARAMETERS//
 
@@ -146,16 +146,13 @@ void setup() {
 		  }
 	  }
 
-    if(millis-Last_Time >= 1)
-    {
-      // Check this every time through the loop, we do not want to miss this 
-      int Value = analogRead(Angle_Sensor_Pin);
-      Serial.println(Value);
-      if (Value > Reference-Swing_Limit && Value < Reference+Swing_Limit){// Check to see if it is within the limit for PID to take over
-      is_Controlled = true;// If so, then we will allow the PID to take over
-      SetSpeed(0);// Stop the motor
-      break;// And we need to exit the loop
-	    }
+    // Check this every time through the loop, we do not want to miss this 
+    int Value = analogRead(Angle_Sensor_Pin);
+    Serial.println(Value);
+    if (Value > Reference-Swing_Limit && Value < Reference+Swing_Limit){// Check to see if it is within the limit for PID to take over
+    is_Controlled = true;// If so, then we will allow the PID to take over
+    SetSpeed(0);// Stop the motor
+    break;// And we need to exit the loop
     }
   //If we have not gotten a sample, continue to do the same thing. i.e. change nothing
   }
