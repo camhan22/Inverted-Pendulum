@@ -3,7 +3,7 @@
 Pid::Pid(int ts, char td, int r, double kp, double ki, double kd)//Constructor
 {
 	TimeStep_ = ts;
-	TimeDivisor_ = (td == 'm') ? 1000 : 100000;
+	TimeDivisor_ = (td == 'm') ? 1000 : 1000000;
 	Kp_ = kp;
 	Ki_ = ki;
 	Kd_ = kd;
@@ -52,7 +52,7 @@ char Pid::getTimeDivisor()
 	{
 		return 'm';
 	}
-	else
+	else if(TimeDivisor_ == 1000000)
 	{
 		return 'u';
 	}
@@ -86,7 +86,7 @@ void Pid::SetInput(int i)// i is between 0 and 1023
 }
 void Pid::CalcDerivative()
 {
-	Derivative_ = (double)(Current_Error_-Previous_Error_)/((double)TimeStep_/(double)TimeDivisor_);
+	Derivative_ = ((double)Current_Error_- (double)Previous_Error_)/((double)TimeStep_/(double)TimeDivisor_);
 }
 void Pid::CalcIntegral()
 {

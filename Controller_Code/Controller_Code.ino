@@ -31,23 +31,25 @@ int Track_Pin = A3;
 //SYSTEM PARAMETERS//
 int Max_Sensor_Value = 1023;// Max sensor value at system limits
 int Min_Sensor_Value = 0;// Min sensor value at system limts
-int Sample_Period = 10;// Time between samples
+int Sample_Period = 10000;// Time between samples
 unsigned long Current_Time = 0;
 unsigned long Last_Time = 0;
 int Mode = 0;
 //END SYSTEM PARAMETERS//
 
 //CONTROLLER PARAMETERS//
-double Control_Signal = 20;
+double Control_Signal = 40;
 int Current_Value;
-int Reference = 400;
+int Reference = 512;
 int Previous_Value;// Holds the previous value of the sensor during the swing
 bool is_Controlled = false;// Variable to hold whether the system should swing or control the arm
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
 //By default it should swing since it will be at the bottom of the arc
 int Swing_Limit = 15;// Variable to hold the value at which the controller will switch to controlled Mode
-int Swing_Rate = 3;// Dictates how fast the system will get to the controlling point
-Pid Controller(Sample_Period, 'm', Reference, 1.5, 0.40, 0.2);// Create the controller
+int Swing_Rate = 5;// Dictates how fast the system will get to the controlling point
+long Swing_Update_Count = 0;
+long Swing_Update_Rate = 50;// How fast the system will respond (Only affects the outputs, the inputs will run at the sample period)
+Pid Controller(Sample_Period, 'u', Reference, 1.8, 5.29 ,0.153);// Create the controller
 //END CONTROLLER PARAMETERS//
 
 //FUNCTION PROTOTYPES//
@@ -60,7 +62,7 @@ void(* resetFunc) (void) = 0;// Needed to reset the arduino by software
 
 void setup() {
   delay(2000);
-  Serial.begin(9600);
+  Serial.begin(115200);
   //Setup the I/O pins
   pinMode(Power_Pin, OUTPUT);
   digitalWrite(Power_Pin, HIGH);// Set the pin to output 5v for H_Bridge
@@ -111,7 +113,7 @@ void setup() {
   //START-UP SWING//
   while(!is_Controlled)// While the system swings
   {
-	  Current_Time = millis();
+	  Current_Time = micros();
 	  if(Current_Time - Last_Time >= Sample_Period)// Once we have elapsed the sample period, we need a new value
 	  {
       Current_Value = analogRead(Angle_Sensor_Pin);
@@ -128,8 +130,8 @@ void setup() {
 				  is_Updated = false;// We have given it new commands and we shoudl do them
 			  }
 		  }
-
-      if(millis()-Last_Time > 200){// Only update the output only twice a second to avoid large torques applied to belt
+      Swing_Update_Count++;// Increment the number of cycles that have passed. Once they get beyond
+      if(Swing_Update_Count >= Swing_Update_Rate){// Only update the output only twice a second to avoid large torques applied to belt
 		    //UPDATE THE SWING//
 		    if(!is_Updated){// Only do this if we need to change direction
 			    Control_Signal+= (Control_Signal > 0) ? Swing_Rate : -1*Swing_Rate;
@@ -140,27 +142,23 @@ void setup() {
 			    SetSpeed(Control_Signal);
 			    is_Updated = true;// Tell the controller the state has been updated
 		    }
-		    //DO THESE EVERY SAMPLE//
-        Last_Time = Current_Time;
-		    Previous_Value = Current_Value;// Update the previous value
+         Swing_Update_Count = 0;//Reset the count
 		  }
+      //DO THESE EVERY SAMPLE//
+      Last_Time = Current_Time;
+      Previous_Value = Current_Value;// Update the previous value
+      if (Current_Value > Reference-Swing_Limit && Current_Value < Reference+Swing_Limit){// Check to see if it is within the limit for PID to take over
+        is_Controlled = true;// If so, then we will allow the PID to take over
+        SetSpeed(0);// Stop the motor
+        break;// And we need to exit the loop
+      }
 	  }
-
-    // Check this every time through the loop, we do not want to miss this 
-    int Value = analogRead(Angle_Sensor_Pin);
-    Serial.println(Value);
-    if (Value > Reference-Swing_Limit && Value < Reference+Swing_Limit){// Check to see if it is within the limit for PID to take over
-    is_Controlled = true;// If so, then we will allow the PID to take over
-    SetSpeed(0);// Stop the motor
-    break;// And we need to exit the loop
-    }
-  //If we have not gotten a sample, continue to do the same thing. i.e. change nothing
   }
   //END START-UP SWING//
 }
 
 void loop() {
-  Current_Time = millis();  
+  Current_Time = micros();  
   if(Current_Time - Last_Time >= Sample_Period)
   {
     if(ModeChanged())// Check if the Mode changed, if so, reset the arduino
@@ -197,12 +195,12 @@ void SetSpeed(double cs)
 }
 void SetDirection(double cs)
 {
-  if(cs > 0)
+  if(cs > 0)// Turn Clockwise
   {
     digitalWrite(IN3_Pin, LOW);
     digitalWrite(IN4_Pin, HIGH);
   }
-  else
+  else// Turn Counter-Clockwise
   {
     digitalWrite(IN3_Pin, HIGH);
     digitalWrite(IN4_Pin, LOW);

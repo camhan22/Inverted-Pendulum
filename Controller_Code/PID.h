@@ -17,7 +17,7 @@ class Pid
 {
 	private:
 		int TimeStep_;
-		int TimeDivisor_;
+		double TimeDivisor_;
 		double Kp_;
 		double Ki_;
 		double Kd_;
