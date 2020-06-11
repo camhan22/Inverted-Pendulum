@@ -40,7 +40,7 @@ int Mode = 0;
 //CONTROLLER PARAMETERS//
 double Control_Signal = 40;
 int Current_Value;
-int Reference = 512;
+int Reference = 508;
 int Previous_Value;// Holds the previous value of the sensor during the swing
 bool is_Controlled = false;// Variable to hold whether the system should swing or control the arm
 bool is_Updated = false;// Tells if the swing direction and speed need to be updated
@@ -49,7 +49,7 @@ int Swing_Limit = 15;// Variable to hold the value at which the controller will 
 int Swing_Rate = 5;// Dictates how fast the system will get to the controlling point
 long Swing_Update_Count = 0;
 long Swing_Update_Rate = 50;// How fast the system will respond (Only affects the outputs, the inputs will run at the sample period)
-Pid Controller(Sample_Period, 'u', Reference, 1.8, 5.29 ,0.153);// Create the controller
+Pid Controller(Sample_Period, 'u', Reference, 2, 5.29 ,0.125);// Create the controller
 //END CONTROLLER PARAMETERS//
 
 //FUNCTION PROTOTYPES//
@@ -98,7 +98,7 @@ void setup() {
   switch (Mode)
   {
     case 1:
-      Controller.setReference(analogRead(Pot_Pin));
+      Controller.setReference(map(analogRead(Pot_Pin),0,1023,1023,0));
       break;
 
     case 2:
@@ -137,7 +137,6 @@ void setup() {
 			    Control_Signal+= (Control_Signal > 0) ? Swing_Rate : -1*Swing_Rate;
 			    // If the value of C_S is above zero, we add swing rate, if less than zero, we subtract. This ensures that we are increasing the power each time
 			    Control_Signal *= -1;// Reverse swing direction
-         Serial.println(Control_Signal);
 			    SetDirection(Control_Signal);
 			    SetSpeed(Control_Signal);
 			    is_Updated = true;// Tell the controller the state has been updated
@@ -147,7 +146,7 @@ void setup() {
       //DO THESE EVERY SAMPLE//
       Last_Time = Current_Time;
       Previous_Value = Current_Value;// Update the previous value
-      if (Current_Value > Reference-Swing_Limit && Current_Value < Reference+Swing_Limit){// Check to see if it is within the limit for PID to take over
+      if (Current_Value > Controller.getReference()-Swing_Limit && Current_Value < Controller.getReference()+Swing_Limit){// Check to see if it is within the limit for PID to take over
         is_Controlled = true;// If so, then we will allow the PID to take over
         SetSpeed(0);// Stop the motor
         break;// And we need to exit the loop
@@ -155,6 +154,7 @@ void setup() {
 	  }
   }
   //END START-UP SWING//
+  Serial.println("Controlled");
 }
 
 void loop() {
