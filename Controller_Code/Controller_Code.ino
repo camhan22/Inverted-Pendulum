@@ -55,7 +55,6 @@ Pid Controller(Sample_Period, 'u', Reference, 2, 5.29 ,0.125);// Create the cont
 //FUNCTION PROTOTYPES//
 void SetSpeed(double cs);
 void SetDirection(double cs);
-double MapDouble(int x, int in_min, int in_max, int out_min, int out_max);
 bool ModeChanged();
 void(* resetFunc) (void) = 0;// Needed to reset the arduino by software
 //END FUNCTION PROTOTYPES//
@@ -207,9 +206,6 @@ void SetDirection(double cs)
   }
 }
 
-double MapDouble(int x, int in_min, int in_max, int out_min, int out_max){
- return ((double)x - (double)in_min) * ((double)out_max - (double)out_min) / ((double)in_max - (double)in_min) + (double)out_min;
- }
 bool ModeChanged()
 {
   int currentmode = Mode;
